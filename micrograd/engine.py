@@ -50,12 +50,21 @@ class Value:
         return out
 
     def __pow__(self, other):
-        assert isinstance(other, (int, float)
-                          ), "only supporting int/float powers for now"
-        out = Value(self.data**other, (self,), f'**{other}')
+
+        outData = []
+
+        for x, dp in enumerate(self.data):
+            assert isinstance(other[x], (int, float)
+                              ), "only supporting int/float powers for now"
+            outData.append(dp**other[x])
+
+        out = Value(outData, (self,), f'**{other}')
 
         def _backward():
-            self.grad += (other * self.data**(other-1)) * out.grad
+            for x, gp in enumerate(self.grad):
+                selfGrad = gp + (other[x] * self.data[x]
+                                 ** (other[x]-1)) * out.grad[x]
+                self.grad[x] = selfGrad
         out._backward = _backward
 
         return out
