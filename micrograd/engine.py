@@ -71,15 +71,15 @@ class Value:
 
     def relu(self):
         outdata = []
-        for x, dp in enumerate(self.data):
-            outdata.append(0 if self.data < 0 else self.data)
+        for dp in self.data:
+            outdata.append(0 if dp < 0 else dp)
 
         out = Value(outdata, (self,), 'ReLU')
 
         def _backward():
             for x, gp in enumerate(self.grad):
                 selfGrad = gp + (out.data[x] > 0) * out.grad[x]
-                self.grad = selfGrad
+                self.grad[x] = selfGrad
         out._backward = _backward
 
         return out
