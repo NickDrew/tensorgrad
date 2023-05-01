@@ -27,10 +27,11 @@ class Value:
 
         def _backward():
             for x, gp in enumerate(self.grad):
-
-                self.grad[x] = gp + out.grad[x]
+                if x < len(other.grad):
+                    self.grad[x] = gp + out.grad[x]
             for x, gp in enumerate(other.grad):
-                other.grad[x] = gp + self.grad[x]
+                if x < len(self.grad):
+                    other.grad[x] = gp + self.grad[x]
         out._backward = _backward
 
         return out
