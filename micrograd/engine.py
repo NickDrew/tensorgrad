@@ -25,9 +25,9 @@ class Value:
 
         def _backward():
             for x, gp in enumerate(self.grad):
-                self.grad[x] = gp + out.grad[x]
-            for x, gp in enumerate(other.grad):
-                other.grad[x] = gp + self.grad[x]
+                grad = gp + out.grad[x]
+                self.grad[x] = grad
+                other.grad[x] = grad
         out._backward = _backward
 
         return out
