@@ -1,7 +1,7 @@
 
 
 class Value:
-    """ stores an array of scalar values and their gradient """
+    """ stores an array of scalar values and their gradients """
 
     def __init__(self, data, _children=(), _op='', label=''):
         self.data = data
@@ -17,21 +17,17 @@ class Value:
     def __add__(self, other):
         other = other if isinstance(other, Value) else Value(other)
         outdata = []
+
         for x, dp in enumerate(self.data):
-            if x < len(other.data):
-                outdata.append(dp + other.data[x])
-            else:
-                outdata.append(dp)
+            outdata.append(dp + other.data[x])
 
         out = Value(outdata, (self, other), '+')
 
         def _backward():
             for x, gp in enumerate(self.grad):
-                if x < len(other.grad):
-                    self.grad[x] = gp + out.grad[x]
+                self.grad[x] = gp + out.grad[x]
             for x, gp in enumerate(other.grad):
-                if x < len(self.grad):
-                    other.grad[x] = gp + self.grad[x]
+                other.grad[x] = gp + self.grad[x]
         out._backward = _backward
 
         return out
