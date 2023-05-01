@@ -3,7 +3,7 @@
 class Value:
     """ stores an array of scalar values and their gradient """
 
-    def __init__(self, data, _children=(), _op=''):
+    def __init__(self, data, _children=(), _op='', label=''):
         self.data = data
         self.grad = []
         for dp in data:
@@ -12,14 +12,25 @@ class Value:
         self._backward = lambda: None
         self._prev = set(_children)
         self._op = _op  # the op that produced this node, for graphviz / debugging / etc
+        self.label = label
 
     def __add__(self, other):
         other = other if isinstance(other, Value) else Value(other)
-        out = Value(self.data + other.data, (self, other), '+')
+        outdata = []
+        for x, dp in enumerate(self.data):
+            if x < len(other.data):
+                outdata.append(dp + other.data[x])
+            else:
+                outdata.append(dp)
+
+        out = Value(outdata, (self, other), '+')
 
         def _backward():
-            self.grad += out.grad
-            other.grad += out.grad
+            for x, gp in enumerate(self.grad):
+
+                self.grad[x] = gp + out.grad[x]
+            for x, gp in enumerate(other.grad):
+                other.grad[x] = gp + self.grad[x]
         out._backward = _backward
 
         return out
@@ -70,7 +81,9 @@ class Value:
         build_topo(self)
 
         # go one variable at a time and apply the chain rule to get its gradient
-        self.grad = 1
+        self.grad = []
+        for dp in self.data:
+            self.grad.append(1)
         for v in reversed(topo):
             v._backward()
 
