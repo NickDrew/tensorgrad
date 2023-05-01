@@ -106,7 +106,10 @@ class Value:
             v._backward()
 
     def __neg__(self):  # -self
-        return self * -1
+        reverser = []
+        for dg in self.data:
+            reverser.append(-1)
+        return self * reverser
 
     def __radd__(self, other):  # other + self
         return self + other
