@@ -1,13 +1,16 @@
-
-
 class Value:
-    """ stores a list of scalar values and their gradients """
+    """ stores a 2d tensor of scalar values and their gradients """
 
     def __init__(self, data, _children=(), _op='', label=''):
         self.data = data
         self.grad = []
-        for dp in data:
-            self.grad.append(0)
+
+        # build the gradient data using the incoming data
+        for da in data:
+            self.grad.append([])
+            for dp in da:
+                self.grad[len(self.grad)-1].append(0)
+
         # internal variables used for autograd graph construction
         self._backward = lambda: None
         self._prev = set(_children)
@@ -18,16 +21,19 @@ class Value:
         other = other if isinstance(other, Value) else Value(other)
         outdata = []
 
-        for x, dp in enumerate(self.data):
-            outdata.append(dp + other.data[x])
+        for x, da in enumerate(self.data):
+            outdata.append([])
+            for y, dp in enumerate(da):
+                outdata[x].append(dp + other.data[x][y])
 
         out = Value(outdata, (self, other), '+')
 
         def _backward():
-            for x, gp in enumerate(self.grad):
-                grad = gp + out.grad[x]
-                self.grad[x] = grad
-                other.grad[x] = grad
+            for x, ga in enumerate(self.grad):
+                for y, gp in enumerate(ga):
+                    grad = gp + out.grad[x][y]
+                    self.grad[x][y] = grad
+                    other.grad[x][y] = grad
         out._backward = _backward
 
         return out
@@ -35,16 +41,19 @@ class Value:
     def __mul__(self, other):
         other = other if isinstance(other, Value) else Value(other)
         outdata = []
-        for x, dp in enumerate(self.data):
-            outdata.append(dp*other.data[x])
+        for x, da in enumerate(self.data):
+            outdata.append([])
+            for y, dp in enumerate(da):
+                outdata[x].append(dp*other.data[x][y])
         out = Value(outdata, (self, other), '*')
 
         def _backward():
-            for x, gp in enumerate(out.grad):
-                selfGrad = self.grad[x] + (other.data[x] * gp)
-                self.grad[x] = selfGrad
-                otherGrad = other.grad[x] + (self.data[x] * gp)
-                other.grad[x] = otherGrad
+            for x, ga in enumerate(out.grad):
+                for y, gp in enumerate(ga):
+                    selfGrad = self.grad[x][y] + (other.data[x][y] * gp)
+                    self.grad[x][y] = selfGrad
+                    otherGrad = other.grad[x][y] + (self.data[x][y] * gp)
+                    other.grad[x][y] = otherGrad
         out._backward = _backward
 
         return out
@@ -53,33 +62,38 @@ class Value:
 
         outData = []
 
-        for x, dp in enumerate(self.data):
-            assert isinstance(other[x], (int, float)
-                              ), "only supporting int/float powers for now"
-            outData.append(dp**other[x])
-
+        for x, da in enumerate(self.data):
+            outData.append([])
+            for y, dp in enumerate(da):
+                assert isinstance(other, (int, float)
+                                  ), "only supporting int/float powers for now"
+                outData[x].append(dp**other)
         out = Value(outData, (self,), f'**{other}')
 
         def _backward():
-            for x, gp in enumerate(self.grad):
-                selfGrad = gp + (other[x] * self.data[x]
-                                 ** (other[x]-1)) * out.grad[x]
-                self.grad[x] = selfGrad
+            for x, ga in enumerate(self.grad):
+                for y, gp in enumerate(ga):
+                    selfGrad = gp + (other * self.data[x][y]
+                                     ** (other-1)) * out.grad[x][y]
+                    self.grad[x][y] = selfGrad
         out._backward = _backward
 
         return out
 
     def relu(self):
         outdata = []
-        for dp in self.data:
-            outdata.append(0 if dp < 0 else dp)
+        for x, da in enumerate(self.data):
+            outdata.append([])
+            for dp in da:
+                outdata[x].append(0 if dp < 0 else dp)
 
         out = Value(outdata, (self,), 'ReLU')
 
         def _backward():
-            for x, gp in enumerate(self.grad):
-                selfGrad = gp + (out.data[x] > 0) * out.grad[x]
-                self.grad[x] = selfGrad
+            for x, ga in enumerate(self.grad):
+                for y, gp in enumerate(ga):
+                    selfGrad = gp + (out.data[x][y] > 0) * out.grad[x][y]
+                    self.grad[x][y] = selfGrad
         out._backward = _backward
 
         return out
@@ -100,15 +114,19 @@ class Value:
 
         # go one variable at a time and apply the chain rule to get its gradient
         self.grad = []
-        for dp in self.data:
-            self.grad.append(1)
+        for x, da in enumerate(self.data):
+            self.grad.append([])
+            for dp in da:
+                self.grad[x].append(1)
         for v in reversed(topo):
             v._backward()
 
     def __neg__(self):  # -self
         reverser = []
-        for dg in self.data:
-            reverser.append(-1)
+        for x, da in enumerate(self.data):
+            reverser.append([])
+            for dg in da:
+                reverser[x].append(-1)
         return self * reverser
 
     def __radd__(self, other):  # other + self
