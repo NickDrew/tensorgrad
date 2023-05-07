@@ -1,3 +1,15 @@
+# takes an incoming scalar and converts it to match the shape of this values held data
+def convertScalarToMatchTensor(tensor, scalar):
+    assert isinstance(scalar, (int, float)
+                      ), "only supporting the conversion of int/float for now"
+    tensorOut = []
+    for x, da in enumerate(tensor):
+        tensorOut.append([])
+        for dp in da:
+            tensorOut[x].append(scalar)
+    return tensorOut
+
+
 class Value:
     """ stores a 2d tensor of scalar values and their gradients """
 
@@ -18,7 +30,8 @@ class Value:
         self.label = label
 
     def __add__(self, other):
-        other = other if isinstance(other, Value) else Value(other)
+        other = other if isinstance(other, Value) else Value(
+            convertScalarToMatchTensor(self.data, other))
         outdata = []
 
         for x, da in enumerate(self.data):
@@ -39,7 +52,8 @@ class Value:
         return out
 
     def __mul__(self, other):
-        other = other if isinstance(other, Value) else Value(other)
+        other = other if isinstance(other, Value) else Value(
+            convertScalarToMatchTensor(self.data, other))
         outdata = []
         for x, da in enumerate(self.data):
             outdata.append([])
@@ -122,12 +136,7 @@ class Value:
             v._backward()
 
     def __neg__(self):  # -self
-        reverser = []
-        for x, da in enumerate(self.data):
-            reverser.append([])
-            for dg in da:
-                reverser[x].append(-1)
-        return self * reverser
+        return self * -1
 
     def __radd__(self, other):  # other + self
         return self + other
