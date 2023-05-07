@@ -1,7 +1,7 @@
 
 # tensorgrad
 
-![awww](puppy.jpg)
+![awww](puppies.jpg)
 
 A derivative of micrograd, altered to process multidimensional arrays of scalar values.
 
