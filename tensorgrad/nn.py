@@ -25,19 +25,19 @@ class Neuron(Module):
                         init = random.uniform(-1, 1)
                     else:
                         init = 0
-                tensorOut[x].append(init)
+                    tensorOut[x].append(init)
             return tensorOut
 
         self.w = [Value(tensorInitial()) for _ in range(nin)]
-        self.b = Value(tensorInitial(False))
+        self.b = [Value(tensorInitial(False)) for _ in range(nin)]
         self.nonlin = nonlin
 
     def __call__(self, x):
-        act = sum((wi*xi for wi, xi in zip(self.w, x)), self.b)
+        act = sum(((wi*xi)+bi for wi, xi, bi in zip(self.w, x, self.b)))
         return act.relu() if self.nonlin else act
 
     def parameters(self):
-        return self.w + [self.b]
+        return self.w + self.b
 
     def __repr__(self):
         return f"{'ReLU' if self.nonlin else 'Linear'}Neuron({len(self.w)})"
