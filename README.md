@@ -32,36 +32,23 @@ print(b.grad) # prints the numerical value of dg/db for all four values in the t
 ```
 
 
-
-## All below this tbd
-
-### Training a neural net
-
-The notebook `demo.ipynb` provides a full demo of training an 2-layer neural network (MLP) binary classifier. This is achieved by initializing a neural net from `micrograd.nn` module, implementing a simple svm "max-margin" binary classification loss and using SGD for optimization. As shown in the notebook, using a 2-layer neural net with two 16-node hidden layers we achieve the following decision boundary on the moon dataset:
-
-![2d neuron](moon_mlp.png)
-
 ### Tracing / visualization
 
-For added convenience, the notebook `trace_graph.ipynb` produces graphviz visualizations. E.g. this one below is of a simple 2D neuron, arrived at by calling `draw_dot` on the code below, and it shows both the data (left number in each node) and the gradient (right number in each node).
+For convenience, the notebook `trace_graph.ipynb` produces graphviz visualizations. E.g. this one below is of a simple 2D neuron, arrived at by calling `draw_dot` on the code below, and it shows both the data (left number in each node) and the gradient (right number in each node).
 
 ```python
-from micrograd import nn
-n = nn.Neuron(2)
-x = [Value(1.0), Value(-2.0)]
+from tensorgrad import nn
+n = nn.Neuron(2, [3,3])
+x = [Value([[1.0,2.0,3.0],[4.0,5.0,6.0],[7.0,8.0,9.0]]), Value([[-2.0,-4.0,-5.0],[-6.0,-7.0,-8.0],[-9.0,-10.0,-11.0]])]
 y = n(x)
+y.backward()
+
 dot = draw_dot(y)
 ```
 
 ![2d neuron](gout.svg)
 
-### Running tests
 
-To run the unit tests you will have to install [PyTorch](https://pytorch.org/), which the tests use as a reference for verifying the correctness of the calculated gradients. Then simply:
-
-```bash
-python -m pytest
-```
 
 ### License
 

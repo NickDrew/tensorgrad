@@ -4,14 +4,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="micrograd",
-    version="0.1.0",
-    author="Andrej Karpathy",
-    author_email="andrej.karpathy@gmail.com",
-    description="A tiny scalar-valued autograd engine with a small PyTorch-like neural network library on top.",
+    name="tensorgrad",
+    version="0.0.1",
+    author="Nicholas Drew",
+    author_email="nicholas.drew@hotmail.com",
+    description="A tiny tensor-valued autograd engine with a small PyTorch-like neural network library on top, building on work done by Andrej Karpathy",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/karpathy/micrograd",
+    url="https://github.com/nickdrew/tensorgrad",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
