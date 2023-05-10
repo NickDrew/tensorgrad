@@ -11,7 +11,7 @@ A derivative of micrograd, altered to process multidimensional arrays of scalar 
 Below is a slightly contrived example showing a number of possible supported operations:
 
 ```python
-from micrograd.engine import Value
+from tensorgrad.engine import Value
 
 a = Value([[-4.0,-8.0],[-2.0,-4.0]])
 b = Value([[2.0,6.0],[4.0,8.0]])
@@ -38,8 +38,9 @@ For convenience, the notebook `trace_graph.ipynb` produces graphviz visualizatio
 
 ```python
 from tensorgrad import nn
-n = nn.Neuron(2, [3,3])
-x = [Value([[1.0,2.0,3.0],[4.0,5.0,6.0],[7.0,8.0,9.0]]), Value([[-2.0,-4.0,-5.0],[-6.0,-7.0,-8.0],[-9.0,-10.0,-11.0]])]
+n = nn.Neuron(2, [3, 3])
+x = [Value([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0], [7.0, 8.0, 9.0]]),
+     Value([[-2.0, -4.0, -5.0], [-6.0, -7.0, -8.0], [-9.0, -10.0, -11.0]])]
 y = n(x)
 y.backward()
 
